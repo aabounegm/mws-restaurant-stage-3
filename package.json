@@ -1,0 +1,19 @@
+{
+  "name": "restaurant-reviews",
+  "version": "1.0.0",
+  "description": "Udacity's Restaurant Reviews App project - stage 2",
+  "main": "gulpfile.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aabounegm/mws-restaurant-stage-2.git"
+  },
+  "author": "AbdelRahman Aly Abounegm",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/aabounegm/mws-restaurant-stage-2/issues"
+  },
+  "homepage": "https://github.com/aabounegm/mws-restaurant-stage-2#readme"
+}
