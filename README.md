@@ -17,3 +17,17 @@ You have been provided the code for a restaurant reviews website. The code has a
 3. Cache the JSON responses for offline use by using the IndexedDB API.
 4. Follow the recommendations provided by Lighthouse to achieve the required performance targets.
 
+### Running the project
+
+There are a few options to run the website. First install all dependencies using `npm install`, and then:
+
+1- Either run `gulp build`, which will only run the build process once and just output the files, and then
+- run `gulp webserver`, or
+- run `python -m http.server 8000` if using python3, or `python -m SimpleHTTPServer 8000` for python2, or
+- use a web server of your choice
+
+2- Or run just `gulp`, which will run everything in a development environment and listen for changes in files,
+
+3- Or run `gulp --env production` which will run the same tasks and listen for changes, but in a production environment, which will minify JS and CSS. This is recommended for final testing before releasing.
+
+And then access the website on <localhost:8000>
