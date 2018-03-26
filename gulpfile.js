@@ -30,9 +30,7 @@ gulp.task('js:minify', function() {
 		// .pipe(development(sourcemaps.init()))
 		.pipe(production(minify({
 			noSource: true,
-			ext: {
-				min: '.js'
-			}
+			ext: {min: '.js'}
 		})))
 		// .pipe(development(sourcemaps.write()))
 		.pipe(gulp.dest('./dist/js/'));
@@ -65,5 +63,5 @@ gulp.task('imagemin', function() {
 gulp.task('set-dev', development.task);
 gulp.task('set-pro', production.task);
 
-gulp.task('default', ['set-dev', 'imagemin', 'sass:watch', 'js:watch', 'root:watch', 'webserver']);
+gulp.task('default', ['sass:watch', 'js:watch', 'root:watch', 'webserver']);
 gulp.task('build', ['set-pro', 'imagemin', 'sass', 'js:minify', 'root:copy']);
