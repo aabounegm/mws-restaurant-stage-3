@@ -1,9 +1,11 @@
-const cacheName = "restaurant-reviews-ver1.0";
+/* eslint-env worker */
+importScripts('');
+const cacheName = 'restaurant-reviews-ver1.0';
 
 const cssFiles = ['styles'];
 const dataFiles = ['restaurants'];
 const imgFiles = [1,2,3,4,5,6,7,8,9,10];
-const jsFiles = ['dbhelper', 'main', 'restaurant_info']
+const jsFiles = ['dbhelper', 'main', 'restaurant_info'];
 const htmlFiles = ['index', 'restaurant'];
 
 self.addEventListener('install', function(event) {
@@ -29,7 +31,7 @@ self.addEventListener('fetch', function(event) {
 					return response;
 				}).catch(function(error) {
 					console.log(error);
-					return new Response("No internet!");
+					return new Response('No internet!');
 				});
 			});
 		})
