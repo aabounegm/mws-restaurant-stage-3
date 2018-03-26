@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/aabounegm/mws-restaurant-stage-2#readme",
   "devDependencies": {
+    "gulp": "^3.9.1",
     "gulp-environments": "^0.1.2",
     "gulp-imagemin": "^4.1.0",
     "gulp-minify": "^2.1.0",
@@ -24,6 +25,6 @@
     "gulp-sourcemaps": "^2.6.4"
   },
   "dependencies": {
-    "gulp": "^3.9.1"
+    "gulp-webserver": "^0.9.1"
   }
 }
