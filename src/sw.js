@@ -1,5 +1,5 @@
 /* eslint-env worker */
-importScripts('');
+// importScripts('');
 const cacheName = 'restaurant-reviews-ver1.0';
 
 const cssFiles = ['styles'];
