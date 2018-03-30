@@ -31,3 +31,5 @@ There are a few options to run the website. First install all dependencies using
 3- Or run `gulp --env production` which will run the same tasks and listen for changes, but in a production environment, which will minify JS and CSS. This is recommended for final testing before releasing.
 
 And then access the website on <localhost:8000>
+
+_Note: you will need to install GraphicsMagick if you intend to use the `imagemin` task in gulp_
