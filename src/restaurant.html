@@ -8,9 +8,9 @@
 	<link rel="manifest" href="/manifest.json" />
 	<link rel="icon" type="image/ico" href="favicon.ico" />
 	<!-- Normalize.css for better cross-browser consistency -->
-	<link rel="stylesheet" defer href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css" />
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css" />
 	<!-- Main CSS file -->
-	<link rel="stylesheet" async href="css/styles.css" type="text/css">
+	<link rel="stylesheet" href="css/styles.css" type="text/css">
 	<title>Restaurant Info</title>
 </head>
 
@@ -32,7 +32,7 @@
 	<!-- End header -->
 
 	<!-- Beginning main -->
-	<main id="maincontent">
+	<main id="maincontent" role="main">
 		<!-- Beginning map -->
 		<section id="map-container">
 			<div id="map" role="application"></div>
@@ -62,7 +62,8 @@
 	<!-- End footer -->
 
 	<!-- Beginning scripts -->
-	<script src="https://unpkg.com/dexie@latest/dist/dexie.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/dexie/2.0.2/dexie.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/blazy/1.8.2/blazy.min.js"></script>
 	<!-- Database helpers -->
 	<script type="text/javascript" src="js/dbhelper.js"></script>
 	<!-- Main javascript file -->
