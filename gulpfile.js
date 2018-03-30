@@ -1,7 +1,7 @@
 /* eslint-env node */
 const gulp = require('gulp');
 const minify = require('gulp-minify');
-const imagemin = require('gulp-imagemin');
+const responsive = require('gulp-responsive-images');
 const sass = require('gulp-sass');
 const environment = require('gulp-environments');
 const sourcemaps = require('gulp-sourcemaps');
@@ -53,9 +53,37 @@ gulp.task('root:copy', function() {
 gulp.task('root:watch', ['root:copy'], function() {
 	gulp.watch('./src/*.*', ['root:copy']);
 });
-gulp.task('imagemin', function() {
-	return gulp.src('./src/img/*')
-		.pipe(imagemin({verbose:false}))
+
+gulp.task('icon:copy', function() {
+	return gulp.src('./src/img/icons/*.png')
+		.pipe(gulp.dest('./dist/img/icons'));
+});
+gulp.task('imagemin', ['icon:copy'], function() {
+	return gulp.src('./src/img/*.jpg')
+		.pipe(responsive({
+			'*.jpg': [
+				{
+					width: 200,
+					quality: 70,
+					suffix: '_200'
+				},
+				{
+					width: 400,
+					quality: 70,
+					suffix: '_400'
+				},
+				{
+					width: 600,
+					quality: 70,
+					suffix: '_600'
+				},
+				{
+					width: 800,
+					quality: 70,
+					suffix: '_800'
+				},
+			]
+		}))
 		.pipe(gulp.dest('./dist/img/'));
 });
 
@@ -63,5 +91,5 @@ gulp.task('imagemin', function() {
 gulp.task('set-dev', development.task);
 gulp.task('set-pro', production.task);
 
-gulp.task('default', ['sass:watch', 'js:watch', 'root:watch', 'webserver']);
+gulp.task('default', ['imagemin', 'sass:watch', 'js:watch', 'root:watch', 'webserver']);
 gulp.task('build', ['set-pro', 'imagemin', 'sass', 'js:minify', 'root:copy']);
