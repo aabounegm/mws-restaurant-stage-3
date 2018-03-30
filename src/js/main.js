@@ -4,15 +4,49 @@ let restaurants,
 var map;
 var markers = [];
 
-/* global DBHelper, google */
+/* global DBHelper, google, Blazy */
 /* exported restaurants, neighborhoods, cuisines, map, markers */
 
 /**
  * Fetch neighborhoods and cuisines as soon as the page is loaded.
  */
+let bLazy = new Blazy({
+	breakpoints: [
+		{
+			width: 200,
+			src: 'data-src-200'
+		},
+		{
+			width: 400,
+			src: 'data-src-400'
+		},
+		{
+			width: 600,
+			src: 'data-src-600'
+		},
+		{
+			width: 800,
+			src: 'data-src-800'
+		},
+	],
+	selector: '.restaurant-img',
+	success: function(element) {
+		// console.log(element);
+	},
+	error: function(ele, msg){
+		// console.log(ele, msg);
+		if(msg === 'missing'){
+			// Data-src is missing
+		}
+		else if(msg === 'invalid'){
+			// Data-src is invalid
+		}  
+	}
+});
 document.addEventListener('DOMContentLoaded', (event) => {
 	fetchNeighborhoods();
 	fetchCuisines();
+	bLazy.revalidate();
 });
 
 /**
@@ -132,6 +166,7 @@ function fillRestaurantsHTML(restaurants = self.restaurants) {
 	restaurants.forEach(restaurant => {
 		ul.append(createRestaurantHTML(restaurant));
 	});
+	bLazy.revalidate();
 	addMarkersToMap();
 }
 
@@ -143,10 +178,16 @@ function createRestaurantHTML(restaurant) {
 	const URLs = DBHelper.imageUrlForRestaurant(restaurant);
 	const image = document.createElement('img');
 	image.className = 'restaurant-img';
-	image.src = URLs[2].slice(0, URLs[2].indexOf(' '));
+	// image.src = URLs[1].slice(0, URLs[1].indexOf(' '));
+	image.src = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';
+	image.setAttribute('data-src', URLs[1]);	// Fallback
+	image.setAttribute('data-src-200', URLs[0]);
+	image.setAttribute('data-src-400', URLs[1]);
+	image.setAttribute('data-src-600', URLs[2]);
+	image.setAttribute('data-src-800', URLs[3]);
 	image.alt = restaurant.name + ' restaurant picture';
-	image.srcset = URLs.join(', ');
-	image.sizes = '(max-width:800px) 100vw, 800px';
+	// image.srcset = URLs.join(', ');
+	// image.sizes = '(max-width:800px) 100vw, 800px';
 	li.append(image);
 
 	const name = document.createElement('h2');

@@ -1,11 +1,44 @@
 let restaurant;
 var map;
 
-/* global google, DBHelper */
+/* global google, DBHelper, Blazy */
 /* exported restaurant, map */
 /**
  * Initialize Google map, called from HTML.
  */
+let bLazy = new Blazy({
+	breakpoints: [
+		{
+			width: 200,
+			src: 'data-src-200'
+		},
+		{
+			width: 400,
+			src: 'data-src-400'
+		},
+		{
+			width: 600,
+			src: 'data-src-600'
+		},
+		{
+			width: 800,
+			src: 'data-src-800'
+		},
+	],
+	selector: '.restaurant-img',
+	success: function(element) {
+		// console.log(element);
+	},
+	error: function(ele, msg){
+		// console.log(ele, msg);
+		if(msg === 'missing'){
+			// Data-src is missing
+		}
+		else if(msg === 'invalid'){
+			// Data-src is invalid
+		}  
+	}
+});
 window.initMap = () => {
 	fetchRestaurantFromURL((error, restaurant) => {
 		if (error) { // Got an error!
@@ -18,6 +51,7 @@ window.initMap = () => {
 			});
 			fillBreadcrumb();
 			DBHelper.mapMarkerForRestaurant(self.restaurant, self.map);
+			bLazy.revalidate();
 		}
 	});
 };
@@ -60,8 +94,14 @@ function fillRestaurantHTML(restaurant = self.restaurant) {
 	const image = document.getElementById('restaurant-img');
 	const URLs = DBHelper.imageUrlForRestaurant(restaurant);
 	image.className = 'restaurant-img';
-	image.src = URLs[2].slice(0, URLs[2].indexOf(' '));
-	image.srcset = URLs.join(', ');
+	// image.src = URLs[2].slice(0, URLs[2].indexOf(' '));
+	// image.srcset = URLs.map(url => `${url}`).join(', ');
+	image.src = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';
+	image.setAttribute('data-src', URLs[2]);	// Fallback
+	image.setAttribute('data-src-200', URLs[0]);
+	image.setAttribute('data-src-400', URLs[1]);
+	image.setAttribute('data-src-600', URLs[2]);
+	image.setAttribute('data-src-800', URLs[3]);
 	image.sizes = '(max-width:800px) 100vw, 800px';
 	image.alt = restaurant.name + ' restaurant picture';
 
@@ -74,6 +114,7 @@ function fillRestaurantHTML(restaurant = self.restaurant) {
 	}
 	// fill reviews
 	fillReviewsHTML();
+	bLazy.revalidate();
 }
 
 /**
@@ -172,4 +213,15 @@ function getParameterByName(name, url) {
 	if (!results[2])
 		return '';
 	return decodeURIComponent(results[2].replace(/\+/g, ' '));
+}
+
+/**
+ * Register the serive worker to make the app work offline
+ */
+if('serviceWorker' in navigator) {
+	navigator.serviceWorker.register('../sw.js').then(function(registration) {
+		console.log('Service Worker registered successfully!', registration);
+	}).catch(function(error) {
+		console.error('Can\'t register Service Worker:', error);
+	});
 }
