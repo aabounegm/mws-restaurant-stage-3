@@ -12,6 +12,7 @@ self.addEventListener('install', function(event) {
 	event.waitUntil(
 		caches.open(cacheName).then(function(cache) {
 			return cache.addAll([
+				'',
 				...htmlFiles.map( fileName => `/${fileName}.html`),
 				...cssFiles.map( fileName => `/css/${fileName}.css`),
 				...dataFiles.map( fileName => `/data/${fileName}.json`),
@@ -31,7 +32,7 @@ self.addEventListener('fetch', function(event) {
 					return response;
 				}).catch(function(error) {
 					console.log(error);
-					return new Response('No internet!');
+					return new Response('No internet or server not available!');
 				});
 			});
 		})
