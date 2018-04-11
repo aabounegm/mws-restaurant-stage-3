@@ -8,6 +8,10 @@ const db = new Dexie('restaurant_reviews');
 db.version(1).stores({
 	restaurants: '&id,cuisine_type,neighborhood'
 });
+const outbox = new Dexie('reviewOutbox');
+outbox.version(1).stores({
+	reviews : '++'
+});
 
 class DBHelper {
 
@@ -206,5 +210,32 @@ class DBHelper {
 		);
 		return marker;
 	}
+
+	static toggleFavorite(id, fav) {
+		fetch(`//localhost:1337/restaurants/${id}/`, {
+			method: 'PUT',
+			body: JSON.stringify({is_favorite: fav})
+		}).then(function(res) {
+			console.log(`${fav? 'M' : 'Unm'}arked restaurant #${id} as favorite`);
+		}).catch(function(error) {
+			console.error('Can\'t mark restaurant as favorite!');
+		});
+		db.restaurants.update(id, {is_favorite:fav});
+	}
+
+	static addToOutbox(review) {
+		outbox.reviews.add(review).then(function(res) {
+			console.log('Review queued successfully');
+			navigator.serviceWorker.ready.then(function(swReg) {
+				swReg.sync.register('reviewOutbox')
+					.then(() => console.log('SW sync registered ["reviewOutbox"]'))
+					.catch(e => console.log('Can\'t register SW sync event:', e));
+			});
+		}).catch(function(error) {
+			console.log('Can\'t queue review. IDB error:', error);
+		});
+	}
+
+
 }
 DBHelper.fetchRestaurants(()=>{});
