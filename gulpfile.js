@@ -6,6 +6,7 @@ const sass = require('gulp-sass');
 const environment = require('gulp-environments');
 const sourcemaps = require('gulp-sourcemaps');
 const webserver = require('gulp-webserver');
+const gzip = require('gulp-gzip');
 
 const production = environment.production;
 const development = environment.development;
@@ -19,6 +20,7 @@ gulp.task('sass', function() {
 			indentWidth: 1
 		}).on('error', sass.logError))
 		.pipe(development(sourcemaps.write()))
+		.pipe(production(gzip()))
 		.pipe(gulp.dest('./dist/css/'));
 });
 gulp.task('sass:watch', ['sass'], function() {
@@ -33,6 +35,7 @@ gulp.task('js:minify', function() {
 			ext: {min: '.js'}
 		})))
 		// .pipe(development(sourcemaps.write()))
+		.pipe(production(gzip()))
 		.pipe(gulp.dest('./dist/js/'));
 });
 gulp.task('js:watch', ['js:minify'], function() {
