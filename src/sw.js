@@ -1,5 +1,6 @@
 /* eslint-env worker */
-// importScripts('');
+/* global Dexie */
+importScripts('https://cdnjs.cloudflare.com/ajax/libs/dexie/2.0.2/dexie.min.js');
 const cacheName = 'restaurant-reviews-ver1.0';
 
 const cssFiles = ['styles'];
@@ -31,7 +32,7 @@ self.addEventListener('fetch', function(event) {
 					cache.put(event.request, response.clone());
 					return response;
 				}).catch(function(error) {
-					console.log(error);
+					console.error(error);
 					return new Response('No internet or server not available!');
 				});
 			});
@@ -45,4 +46,43 @@ self.addEventListener('activate', function(event) {
 			return Promise.all(cacheNames.filter(name => name != cacheName).map(cache => caches.delete(cache)));
 		})
 	);
+});
+
+self.addEventListener('sync', function(event) {
+	console.log('Recieved sync event');
+	if(event.tag !== 'reviewOutbox')
+		return;
+	event.waitUntil(new Promise(function(resolve, reject) {
+		new Dexie('reviewOutbox').open().then(function(outBox) {
+			const table = outBox.table('reviews');
+			table.count().then(c => c && console.log(`Found ${c} queued review${c>1?'s':''}`));
+			let toDelete = [], fetches = [];
+			table.each(async function(review, cursor) {
+				const key = cursor.primaryKey;
+				let x = fetch('//localhost:1337/reviews/', {
+					method: 'POST',
+					body: JSON.stringify(review)
+				}).then(function(res) {
+					console.log('Successfully sent review', key);
+					toDelete.push(key);
+				}).catch(reject);
+				fetches.push(x);
+			}).then(function() {
+				Promise.all(fetches).then(function(){
+					return table.bulkDelete(toDelete);
+				}).then( function() {
+					console.log(`Removed ${toDelete.length} items from queue`); 
+					resolve();
+				}).catch( function(error) {
+					console.error('Can\'t remove from queue!', error);
+				});
+			}).catch(function(error) {
+				console.log('Can\'t open table!', error);
+				reject();
+			});
+		}).catch(function(error) {
+			console.log('Can\'t open IDB!', error);
+			reject();
+		});
+	}));
 });
