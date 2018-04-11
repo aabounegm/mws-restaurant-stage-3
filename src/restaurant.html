@@ -8,9 +8,9 @@
 	<link rel="manifest" href="/manifest.json" />
 	<link rel="icon" type="image/ico" href="favicon.ico" />
 	<!-- Normalize.css for better cross-browser consistency -->
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css" />
+	<link rel="preload" as="style" onload="this.rel='stylesheet'" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css" />
 	<!-- Main CSS file -->
-	<link rel="stylesheet" href="css/styles.css" type="text/css">
+	<link rel="preload" as="style" onload="this.rel='stylesheet'" href="css/styles.css" type="text/css">
 	<title>Restaurant Info</title>
 </head>
 
@@ -52,12 +52,20 @@
 			<ul id="reviews-list"></ul>
 		</section>
 		<!-- End reviews -->
+		<form id="add-review" action="javascript:void(0)">
+			<h3>Add your review</h3>
+			<label>Your name: <input required type="text" name="name" minlength="3" placeholder="Please type your full name" /></label>
+			<label>Visit date: <input required type="date" name="date" placeholder="Your visit date"/></label>
+			<label>Rating: <input required type="number" name="rating" min="1" max="5" placeholder="Give a rating between 1 (worst) and 5 (best)"/></label>
+			<label>Detailed review: <textarea required type="text" name="comments" placeholder="Any more details you'd like to share?"></textarea></label>
+			<button type="Submit">Submit review</button>
+		</form>
 	</main>
 	<!-- End main -->
 
 	<!-- Beginning footer -->
 	<footer id="footer">
-		Copyright (c) 2017 <a href="/"><strong>Restaurant Reviews</strong></a> All Rights Reserved.
+		Copyright (c) 2018 <a href="/"><strong>Restaurant Reviews</strong></a> All Rights Reserved.
 	</footer>
 	<!-- End footer -->
 
