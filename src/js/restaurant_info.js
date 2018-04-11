@@ -113,7 +113,11 @@ function fillRestaurantHTML(restaurant = self.restaurant) {
 		fillRestaurantHoursHTML();
 	}
 	// fill reviews
-	fillReviewsHTML();
+	fetch(`//localhost:1337/reviews/?restaurant_id=${restaurant.id}`)
+		.then(data => data.json())
+		.then(reviews => fillReviewsHTML(reviews))
+		.catch(error => console.log('Can\'t load reviews!'));
+	// fillReviewsHTML();
 	bLazy.revalidate();
 }
 
@@ -148,7 +152,7 @@ function fillReviewsHTML(reviews = self.restaurant.reviews) {
 
 	if (!reviews) {
 		const noReviews = document.createElement('p');
-		noReviews.innerHTML = 'No reviews yet!';
+		noReviews.innerHTML = 'No reviews yet (or no internet)!';
 		container.appendChild(noReviews);
 		return;
 	}
@@ -172,7 +176,7 @@ function createReviewHTML(review) {
 	li.appendChild(name);
 
 	const date = document.createElement('p');
-	date.innerHTML = review.date;
+	date.innerHTML = new Date(review.createdAt).toLocaleDateString();
 	date.className = 'date';
 	li.appendChild(date);
 
@@ -221,7 +225,33 @@ function getParameterByName(name, url) {
 if('serviceWorker' in navigator) {
 	navigator.serviceWorker.register('../sw.js').then(function(registration) {
 		console.log('Service Worker registered successfully!', registration);
+		registration.sync.register('reviewOutbox')
+			.then(() => console.log('SW sync registered ["reviewOutbox"]'))
+			.catch(e => console.log('Can\'t register SW sync event:', e));
 	}).catch(function(error) {
 		console.error('Can\'t register Service Worker:', error);
 	});
 }
+
+document.querySelector('input[type=date]').valueAsDate = new Date();
+document.getElementById('add-review').onsubmit = function(e) {
+	const data = {
+		restaurant_id: getParameterByName('id'),
+		name: this.name.value,
+		// date: this.date,
+		rating: this.rating.value,
+		comments: this.comments.value
+	};
+	fetch('//localhost:1337/reviews/', {
+		method: 'POST',
+		body: JSON.stringify(data)
+	}).then(function(res) {
+		console.log('Review added successfully!');
+		window.location.reload(true);						// Refresh to see it
+	}).catch(function(error) {
+		console.log('Internet problem! Queuing review until sync');
+		// TODO: actually add to IDB and check in SW
+		DBHelper.addToOutbox(data);
+	});
+	this.reset();
+};
