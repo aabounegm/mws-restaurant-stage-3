@@ -177,6 +177,8 @@ function createRestaurantHTML(restaurant) {
 	const li = document.createElement('li');
 	const URLs = DBHelper.imageUrlForRestaurant(restaurant);
 	const image = document.createElement('img');
+	const favorite = document.createElement('i');
+	
 	image.className = 'restaurant-img';
 	// image.src = URLs[1].slice(0, URLs[1].indexOf(' '));
 	image.src = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';
@@ -206,6 +208,15 @@ function createRestaurantHTML(restaurant) {
 	more.innerHTML = 'View Details';
 	more.href = DBHelper.urlForRestaurant(restaurant);
 	li.append(more);
+
+	favorite.className = 'checkbox';
+	favorite.onclick = function(e) {
+		let checking = this.classList.toggle('toggled');
+		DBHelper.toggleFavorite(restaurant.id, checking);
+	};
+	if(restaurant.is_favorite)
+		favorite.classList.add('toggled');
+	li.append(favorite);
 
 	return li;
 }
