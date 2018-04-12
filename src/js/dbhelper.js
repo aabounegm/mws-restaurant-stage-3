@@ -6,7 +6,8 @@
 /* exported DBHelper */
 const db = new Dexie('restaurant_reviews');
 db.version(1).stores({
-	restaurants: '&id,cuisine_type,neighborhood'
+	restaurants: '&id,cuisine_type,neighborhood',
+	reviews: '&id,restaurant_id'
 });
 const outbox = new Dexie('reviewOutbox');
 outbox.version(1).stores({
@@ -37,7 +38,9 @@ class DBHelper {
 					callback(`Request failed. Returned status of ${response.status}`, null);
 			})
 			.then(function(json) {
-				db.restaurants.bulkAdd(json);
+				db.restaurants.bulkAdd(json).catch(function(error) {
+					// console.log(error);
+				});
 				callback(null, json);
 			})
 			.catch(function(error) {
@@ -51,8 +54,6 @@ class DBHelper {
 						}
 					});
 			});
-		
-		
 	}
 
 	/**
@@ -60,22 +61,16 @@ class DBHelper {
 	 */
 	static fetchRestaurantById(id, callback) {
 		// fetch all restaurants with proper error handling.
-		db.restaurants.get(id).then(function(restaurant) {
-			if(restaurant)
-				callback(null, restaurant);
-			else {
-				DBHelper.fetchRestaurants((error, restaurants) => {
-					if (error) {
-						callback(error, null);
-					} else {
-						const restaurant = restaurants.find(r => r.id == id);
-						if (restaurant) { // Got the restaurant
-							callback(null, restaurant);
-						} else { // Restaurant does not exist in the database
-							callback('Restaurant does not exist', null);
-						}
-					}
-				});
+		DBHelper.fetchRestaurants((error, restaurants) => {
+			if (error) {
+				callback(error, null);
+			} else {
+				const restaurant = restaurants.find(r => r.id == id);
+				if (restaurant) { // Got the restaurant
+					callback(null, restaurant);
+				} else { // Restaurant does not exist in the database
+					callback('Restaurant does not exist', null);
+				}
 			}
 		});
 	}
@@ -85,22 +80,15 @@ class DBHelper {
 	 */
 	static fetchRestaurantByCuisine(cuisine, callback) {
 		// Fetch all restaurants  with proper error handling
-		db.restaurants.filter(r => r.cuisine_type == cuisine).toArray().then(function(restaurants) {
-			if(restaurants.length) {
-				callback(null, restaurants);
+		DBHelper.fetchRestaurants((error, restaurants) => {
+			if (error) {
+				callback(error, null);
+			} else {
+				// Filter restaurants to have only given cuisine type
+				const results = restaurants.filter(r => r.cuisine_type == cuisine);
+				callback(null, results);
 			}
-			else {
-				DBHelper.fetchRestaurants((error, restaurants) => {
-					if (error) {
-						callback(error, null);
-					} else {
-						// Filter restaurants to have only given cuisine type
-						const results = restaurants.filter(r => r.cuisine_type == cuisine);
-						callback(null, results);
-					}
-				});
-			}
-		}).catch(e => console.error(e));
+		});
 	}
 
 	/**
@@ -108,22 +96,15 @@ class DBHelper {
 	 */
 	static fetchRestaurantByNeighborhood(neighborhood, callback) {
 		// Fetch all restaurants
-		db.restaurants.filter(r => r.neighborhood == neighborhood).toArray().then(function(restaurants) {
-			if(restaurants.length) {
-				callback(null, restaurants);
+		DBHelper.fetchRestaurants((error, restaurants) => {
+			if (error) {
+				callback(error, null);
+			} else {
+				// Filter restaurants to have only given cuisine type
+				const results = restaurants.filter(r => r.cuisine_type == neighborhood);
+				callback(null, results);
 			}
-			else {
-				DBHelper.fetchRestaurants((error, restaurants) => {
-					if (error) {
-						callback(error, null);
-					} else {
-						// Filter restaurants to have only given cuisine type
-						const results = restaurants.filter(r => r.cuisine_type == neighborhood);
-						callback(null, results);
-					}
-				});
-			}
-		}).catch(e => console.error(e));
+		});
 	}
 
 	/**
@@ -238,7 +219,29 @@ class DBHelper {
 			console.log('Can\'t queue review. IDB error:', error);
 		});
 	}
-
+	static fetchReviewsByRestaurantId(id, callback) {
+		fetch(`//localhost:1337/reviews/?restaurant_id=${id}`)
+			.then(function(response) {
+				if(response.status === 200)
+					return response.json();
+				else
+					throw Error(`Request failed. Returned status of ${response.status}`);	// To go to the .catch
+			})
+			.then(function(json) {
+				db.reviews.bulkAdd(json).catch('BulkError', function(error){
+					// Probably already exists
+					// Or may be really can't access the IDB :D
+					// console.log(error);
+				});
+				callback(null, json);
+			})
+			.catch(function(error) {
+				db.reviews.where({restaurant_id: id}).toArray()
+					.then(function(arr) {
+						callback(arr.length?arr:null);
+					});
+			});
+	}
 
 }
 DBHelper.fetchRestaurants(()=>{});
