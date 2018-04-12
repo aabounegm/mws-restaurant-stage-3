@@ -228,20 +228,43 @@ class DBHelper {
 					throw Error(`Request failed. Returned status of ${response.status}`);	// To go to the .catch
 			})
 			.then(function(json) {
-				db.reviews.bulkAdd(json).catch('BulkError', function(error){
+				db.reviews.bulkAdd(json).catch('BulkError', function(error) {
 					// Probably already exists
 					// Or may be really can't access the IDB :D
 					// console.log(error);
 				});
-				callback(null, json);
+				outbox.reviews.where({restaurant_id: id}).toArray().then(function(pending) {
+					// Merge with outbox
+					if(pending.length)
+						callback([...json, ...pending]);
+					else {
+						callback(json);
+					}
+				}).catch(function(error) {
+					// Can't open outbox
+					// Just send what we got
+					callback(json.length?json:null);
+				});
 			})
 			.catch(function(error) {
 				db.reviews.where({restaurant_id: id}).toArray()
 					.then(function(arr) {
-						callback(arr.length?arr:null);
+						outbox.reviews.where({restaurant_id: id}).toArray().then(function(pending) {
+							if(pending.length)
+								callback([...arr, ...pending]);
+							else {
+								callback(arr);
+							}
+						}).catch(function(error) {
+							// Can't open outbox
+							// Just send what we got
+							callback(arr.length?arr:null);
+						});
+					})
+					.catch(function(error) {
+						callback(null);
 					});
 			});
 	}
-
 }
 DBHelper.fetchRestaurants(()=>{});
