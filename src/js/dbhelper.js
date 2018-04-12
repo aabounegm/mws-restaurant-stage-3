@@ -12,6 +12,7 @@ const outbox = new Dexie('reviewOutbox');
 outbox.version(1).stores({
 	reviews : '++'
 });
+outbox.open();
 
 class DBHelper {
 
@@ -28,28 +29,30 @@ class DBHelper {
 	 * Fetch all restaurants.
 	 */
 	static fetchRestaurants(callback) {
-		db.restaurants.orderBy('id').toArray()
-			.then(function(arr) {
-				if(arr.length) {
-					callback(null, arr);
-				}
-				else {
-					fetch(DBHelper.DATABASE_URL)
-						.then(function(response) {
-							if(response.status === 200)
-								return response.json();
-							else
-								callback(`Request failed. Returned status of ${response.status}`, null);
-						})
-						.then(function(json) {
-							db.restaurants.bulkAdd(json);
-							callback(null, json);
-						})
-						.catch(function(error) {
+		fetch(DBHelper.DATABASE_URL)
+			.then(function(response) {
+				if(response.status === 200)
+					return response.json();
+				else
+					callback(`Request failed. Returned status of ${response.status}`, null);
+			})
+			.then(function(json) {
+				db.restaurants.bulkAdd(json);
+				callback(null, json);
+			})
+			.catch(function(error) {
+				db.restaurants.orderBy('id').toArray()
+					.then(function(arr) {
+						if(arr.length) {
+							callback(null, arr);
+						}
+						else {
 							callback(`Request failed. Returned error: ${error}`, null);
-						});
-				}
+						}
+					});
 			});
+		
+		
 	}
 
 	/**
