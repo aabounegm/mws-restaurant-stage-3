@@ -6,38 +6,41 @@ var map;
 /**
  * Initialize Google map, called from HTML.
  */
-let bLazy = new Blazy({
-	breakpoints: [
-		{
-			width: 200,
-			src: 'data-src-200'
+let bLazy;
+document.addEventListener('DOMContentLoaded', function(event) {
+	bLazy = new Blazy({
+		breakpoints: [
+			{
+				width: 200,
+				src: 'data-src-200'
+			},
+			{
+				width: 400,
+				src: 'data-src-400'
+			},
+			{
+				width: 600,
+				src: 'data-src-600'
+			},
+			{
+				width: 800,
+				src: 'data-src-800'
+			},
+		],
+		selector: '.restaurant-img',
+		success: function(element) {
+			// console.log(element);
 		},
-		{
-			width: 400,
-			src: 'data-src-400'
-		},
-		{
-			width: 600,
-			src: 'data-src-600'
-		},
-		{
-			width: 800,
-			src: 'data-src-800'
-		},
-	],
-	selector: '.restaurant-img',
-	success: function(element) {
-		// console.log(element);
-	},
-	error: function(ele, msg){
-		// console.log(ele, msg);
-		if(msg === 'missing'){
-			// Data-src is missing
+		error: function(ele, msg){
+			// console.log(ele, msg);
+			if(msg === 'missing'){
+				// Data-src is missing
+			}
+			else if(msg === 'invalid'){
+				// Data-src is invalid
+			}  
 		}
-		else if(msg === 'invalid'){
-			// Data-src is invalid
-		}  
-	}
+	});
 });
 window.initMap = () => {
 	fetchRestaurantFromURL((error, restaurant) => {
@@ -113,10 +116,8 @@ function fillRestaurantHTML(restaurant = self.restaurant) {
 		fillRestaurantHoursHTML();
 	}
 	// fill reviews
-	fetch(`//localhost:1337/reviews/?restaurant_id=${restaurant.id}`)
-		.then(data => data.json())
-		.then(reviews => fillReviewsHTML(reviews))
-		.catch(error => console.log('Can\'t load reviews!'));
+
+	DBHelper.fetchReviewsByRestaurantId(restaurant.id, fillReviewsHTML);
 	// fillReviewsHTML();
 	bLazy.revalidate();
 }
@@ -236,10 +237,10 @@ if('serviceWorker' in navigator) {
 document.querySelector('input[type=date]').valueAsDate = new Date();
 document.getElementById('add-review').onsubmit = function(e) {
 	const data = {
-		restaurant_id: getParameterByName('id'),
+		restaurant_id: parseInt(getParameterByName('id'), 10),
 		name: this.name.value,
 		// date: this.date,
-		rating: this.rating.value,
+		rating: parseInt(this.rating.value, 10),
 		comments: this.comments.value
 	};
 	fetch('//localhost:1337/reviews/', {

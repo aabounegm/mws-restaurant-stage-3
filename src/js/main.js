@@ -10,40 +10,41 @@ var markers = [];
 /**
  * Fetch neighborhoods and cuisines as soon as the page is loaded.
  */
-let bLazy = new Blazy({
-	breakpoints: [
-		{
-			width: 200,
-			src: 'data-src-200'
-		},
-		{
-			width: 400,
-			src: 'data-src-400'
-		},
-		{
-			width: 600,
-			src: 'data-src-600'
-		},
-		{
-			width: 800,
-			src: 'data-src-800'
-		},
-	],
-	selector: '.restaurant-img',
-	success: function(element) {
-		// console.log(element);
-	},
-	error: function(ele, msg){
-		// console.log(ele, msg);
-		if(msg === 'missing'){
-			// Data-src is missing
-		}
-		else if(msg === 'invalid'){
-			// Data-src is invalid
-		}  
-	}
-});
+let bLazy;
 document.addEventListener('DOMContentLoaded', (event) => {
+	bLazy = new Blazy({
+		breakpoints: [
+			{
+				width: 200,
+				src: 'data-src-200'
+			},
+			{
+				width: 400,
+				src: 'data-src-400'
+			},
+			{
+				width: 600,
+				src: 'data-src-600'
+			},
+			{
+				width: 800,
+				src: 'data-src-800'
+			},
+		],
+		selector: '.restaurant-img',
+		success: function(element) {
+			// console.log(element);
+		},
+		error: function(ele, msg){
+			// console.log(ele, msg);
+			if(msg === 'missing'){
+				// Data-src is missing
+			}
+			else if(msg === 'invalid'){
+				// Data-src is invalid
+			}  
+		}
+	});	
 	fetchNeighborhoods();
 	fetchCuisines();
 	bLazy.revalidate();
