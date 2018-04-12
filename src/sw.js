@@ -50,9 +50,9 @@ self.addEventListener('activate', function(event) {
 });
 
 self.addEventListener('sync', function(event) {
-	console.log('Recieved sync event');
 	if(event.tag !== 'reviewOutbox')
 		return;
+	console.log('Checking for items to sync...');
 	event.waitUntil(new Promise(function(resolve, reject) {
 		new Dexie('reviewOutbox').open().then(function(outBox) {
 			const table = outBox.table('reviews');
@@ -72,7 +72,10 @@ self.addEventListener('sync', function(event) {
 				Promise.all(fetches).then(function(){
 					return table.bulkDelete(toDelete);
 				}).then( function() {
-					console.log(`Removed ${toDelete.length} items from queue`); 
+					if(toDelete.length)
+						console.log(`Removed ${toDelete.length} items from queue`); 
+					else
+						console.log('Reviews outbox empty 👍');
 					resolve();
 				}).catch( function(error) {
 					console.error('Can\'t remove from queue!', error);
