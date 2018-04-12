@@ -25,19 +25,20 @@ self.addEventListener('install', function(event) {
 });
 
 self.addEventListener('fetch', function(event) {
-	event.respondWith(
-		caches.open(cacheName).then(function(cache) {
-			return cache.match(event.request).then(function(response) {
-				return response || fetch(event.request).then(function(response) {
-					cache.put(event.request, response.clone());
-					return response;
-				}).catch(function(error) {
-					console.error(error);
-					return new Response('No internet or server not available!');
+	if(!event.request.url.includes('reviews'))		// Don't cache review
+		event.respondWith(
+			caches.open(cacheName).then(function(cache) {
+				return cache.match(event.request).then(function(response) {
+					return response || fetch(event.request).then(function(response) {
+						cache.put(event.request, response.clone());
+						return response;
+					}).catch(function(error) {
+						console.error(error);
+						return new Response('No internet or server not available!');
+					});
 				});
-			});
-		})
-	);
+			})
+		);
 });
 
 self.addEventListener('activate', function(event) {
